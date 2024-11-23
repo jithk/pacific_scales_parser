@@ -8,16 +8,23 @@ option(BUILD_TESTS "Build the test apps" ON)
 set(CMAKE_CXX_STANDARD 14)
 add_compile_options(-Wall)
 
+# Find pthreads Library
+find_package(Threads REQUIRED)
+
 add_library(parser-lib STATIC
   src/serial_device.cc
 )
 
 target_include_directories(parser-lib PUBLIC include)
 
-add_executable(${PROJECT}
+add_executable(pacific-parser
   src/main.cc
 )
-target_link_libraries(${PROJECT} PRIVATE parser-lib)
+
+target_link_libraries(pacific-parser PRIVATE
+  parser-lib
+  Threads::Threads
+)
 
 # if (BUILD_TESTS)
 #   include(CTest)
