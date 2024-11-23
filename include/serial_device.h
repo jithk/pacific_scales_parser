@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -31,6 +32,9 @@ public:
     bool Open(const std::string device, BaudRate baudRate);
     bool isDeviceOpen() { return fd >= 0; };
     void Close();
+    int Read(void *dataBuffer, unsigned int bufferSize, std::chrono::milliseconds timeout);
+    void Flush();
+    bool WaitForData(std::chrono::milliseconds timeout);
 
 private:
     int fd = -1;
