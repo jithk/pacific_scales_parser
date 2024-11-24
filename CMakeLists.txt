@@ -19,6 +19,7 @@ target_include_directories(parser-lib PUBLIC include)
 
 add_executable(pacific-parser
   src/main.cc
+  src/scale_data_parser.cc
 )
 
 target_link_libraries(pacific-parser PRIVATE
