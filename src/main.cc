@@ -7,12 +7,16 @@
 #include <thread>
 
 #include <circular_buffer.h>
+#include <getopt.h>
 #include <scale_data_parser.h>
 #include <signal.h>
 
 PacificScales::ScaleDataParser g_scaledataParser;
 PacificScales::CircularBuffer<uint8_t, 8192> g_dataBuffer;
 std::atomic<bool> keepRunning = {true};
+
+static constexpr PacificScales::BaudRate kDEFAULT_BAUD_RATE = PacificScales::BaudRate::BAUD_115200;
+static constexpr const char *kDEFAULT_UART_DEVICE = "/dev/ttyUSB0";
 
 /**
  * @brief Signal handler for Ctrl-C
@@ -25,10 +29,11 @@ void SignalHandler(int) {
  * @brief Thread for reading data from Serial Device
  * @param device Full path to the device file
  */
-void DataReaderThread(const std::string device) {
+void DataReaderThread(const std::string device, PacificScales::BaudRate baudRate) {
     PacificScales::SerialDevice dev;
-    if (!dev.Open(device, PacificScales::BaudRate::BAUD_115200)) {
-        std::cout << "Error: Failed to open device" << std::endl;
+    if (!dev.Open(device, baudRate)) {
+        std::cout << "Error: Failed to open device : " << device << "@B" << baudRate << std::endl;
+        keepRunning = false;
         return;
     }
     std::cout << "Opened the device : " << device << std::endl;
@@ -69,14 +74,59 @@ int32_t getCurrentSeconds(T &now) {
     return secs.count();
 }
 
+void ShowHelpScreen(std::string appName) {
+    std::cout << appName << std::endl;
+    std::cout << "Parse scale data and show every 10 secs as JSON" << std::endl
+              << "Arguments" << std::endl
+              << "\t -p <serial_port_device> [" << kDEFAULT_UART_DEVICE << "]" << std::endl
+              << "\t -b <baud_rate> [" << kDEFAULT_BAUD_RATE << "]" << std::endl;
+}
+
+/**
+ * @brief Function to parse commandline args
+  * @param argc Argument Count
+ * @param argv  Argument Vector
+ * @return std::pair<std::string, PacificScales::BaudRate>
+ */
+std::pair<std::string, PacificScales::BaudRate> ParseCommandlineArgs(int argc, char *argv[]) {
+    auto device = std::string(kDEFAULT_UART_DEVICE);
+    PacificScales::BaudRate baudRate = kDEFAULT_BAUD_RATE;
+
+    int opt = 0;
+    do {
+        opt = getopt(argc, argv, "hp:b:");
+        switch (opt) {
+        case -1:
+            break;
+        case 'p':
+            device = std::string(optarg);
+            continue;
+            ;
+        case 'b':
+            baudRate = static_cast<PacificScales::BaudRate>(std::atoi(optarg));
+            continue;
+        case 'h':
+        default:
+            ShowHelpScreen(argv[0]);
+            exit(0);
+        }
+    } while (opt != -1);
+
+    return {device, baudRate};
+}
+
 /**
  * @brief Main entry point of the application
  * @return returns 0
  */
-int main() {
+int main(int argc, char *argv[]) {
+    // setup signal handlers
     signal(SIGINT, SignalHandler);
-    const auto device = std::string("/tmp/ttyIN");
-    std::thread readerThread(DataReaderThread, device);
+
+    // Parse commandline args
+    auto [device, baudRate] = ParseCommandlineArgs(argc, argv);
+
+    std::thread readerThread(DataReaderThread, device, baudRate);
     std::thread parserThread(DataParserThread);
 
     while (keepRunning) {
