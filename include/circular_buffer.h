@@ -66,7 +66,7 @@ public:
         char *stringBuffer = reinterpret_cast<char *>(m_data.data());
         auto bufferEnd = m_readHead > m_writeHead ? MAX_SIZE : m_writeHead;
         int stringStart = -1;
-        int searchIndex = 0;
+        size_t searchIndex = 0;
         auto findFullString = [&](size_t start, size_t end) -> std::string {
             std::string str;
             stringStart = -1;
