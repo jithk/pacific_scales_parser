@@ -9,19 +9,19 @@
 namespace PacificScales {
 
 // We only support a limite set of baud rates
-enum class BaudRate
+enum BaudRate
 {
-    BAUD_110,
-    BAUD_300,
-    BAUD_600,
-    BAUD_1200,
-    BAUD_2400,
-    BAUD_4800,
-    BAUD_9600,
-    BAUD_19200,
-    BAUD_38400,
-    BAUD_57600,
-    BAUD_115200,
+    BAUD_110 = 110,
+    BAUD_300 = 300,
+    BAUD_600 = 600,
+    BAUD_1200 = 1200,
+    BAUD_2400 = 2400,
+    BAUD_4800 = 4800,
+    BAUD_9600 = 9600,
+    BAUD_19200 = 19200,
+    BAUD_38400 = 38400,
+    BAUD_57600 = 57600,
+    BAUD_115200 = 115200,
 };
 
 class SerialDevice {
