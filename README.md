@@ -36,3 +36,52 @@ cd pacific_scales_parser # move into the source dir
 sudo ./build/pacific-parser  -p /dev/ttyUSB0 -b 115200  # execute the binary with DeviceName and BaudRate
 ```
 Note: `sudo` might not be necessary if the user has sufficient permissions to read the serial device
+### Expected Output
+```bash
+sudo ./pacific-parser -p /dev/ttyUSB0 -b 115200
+Opened the device : /dev/ttyUSB0
+Latest weight data for: Mon Nov 25 00:02:20 2024
+
+{
+  "A" : 5000,
+  "B" : 17000,
+  "C" : 22000,
+  "D" : 15000,
+  "TOTAL" : 59000,
+  "VALID" : true
+}
+
+Latest weight data for: Mon Nov 25 00:02:30 2024
+
+{
+  "A" : 5500,
+  "B" : 17500,
+  "C" : 22500,
+  "D" : 15500,
+  "TOTAL" : 61000,
+  "VALID" : true
+}
+
+Latest weight data for: Mon Nov 25 00:02:40 2024
+
+{
+  "B" : 18000,
+  "A" : 6000,
+  "C" : 23000,
+  "D" : 16000,
+  "TOTAL" : 63000,
+  "VALID" : true
+}
+
+Latest weight data for: Mon Nov 25 00:02:50 2024
+
+{
+  "A" : 5300,
+  "B" : 17300,
+  "C" : 22300,
+  "D" : 15300,
+  "TOTAL" : 60200,
+  "VALID" : true
+}
+
+```
