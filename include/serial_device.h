@@ -30,14 +30,14 @@ public:
     ~SerialDevice();
 
     bool Open(const std::string device, BaudRate baudRate);
-    bool isDeviceOpen() { return fd >= 0; };
+    bool isDeviceOpen() { return m_fd >= 0; };
     void Close();
     int Read(void *dataBuffer, unsigned int bufferSize, std::chrono::milliseconds timeout);
     void Flush();
     bool WaitForData(std::chrono::milliseconds timeout);
 
 private:
-    int fd = -1;
+    int m_fd = -1;
 };
 
 }  // namespace

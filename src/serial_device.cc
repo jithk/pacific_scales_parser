@@ -51,18 +51,18 @@ bool SerialDevice::Open(const std::string device, BaudRate baudRate) {
     }
 
     // Open device
-    fd = open(device.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+    m_fd = open(device.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
     // return error if open failed
-    if (fd < 0) {
+    if (m_fd < 0) {
         return false;
     }
 
     // Set the nodelay option
-    fcntl(fd, F_SETFL, FNDELAY);
+    fcntl(m_fd, F_SETFL, FNDELAY);
 
     // read the current terminal options
-    tcgetattr(fd, &options);
+    tcgetattr(m_fd, &options);
 
     cfsetispeed(&options, baud->second);
     cfsetospeed(&options, baud->second);
@@ -71,7 +71,7 @@ bool SerialDevice::Open(const std::string device, BaudRate baudRate) {
     options.c_cflag |= (CLOCAL | CREAD | CS8);
     options.c_iflag |= (IGNPAR | IGNBRK);
 
-    tcsetattr(fd, TCSANOW, &options);
+    tcsetattr(m_fd, TCSANOW, &options);
 
     return true;
 }
@@ -81,8 +81,8 @@ bool SerialDevice::Open(const std::string device, BaudRate baudRate) {
  * Closes the serial device and reset the internal file desc
  */
 void SerialDevice::Close() {
-    close(fd);
-    fd = -1;
+    close(m_fd);
+    m_fd = -1;
 }
 
 /**
@@ -105,7 +105,7 @@ int SerialDevice::Read(void *dataBuffer, unsigned int bufferSize, std::chrono::m
         if (!WaitForData(timeout)) {
             return totalBytesRead;
         }
-        int bytesRead = read(fd, (void *)buff, bufferSize - totalBytesRead);
+        int bytesRead = read(m_fd, (void *)buff, bufferSize - totalBytesRead);
         // Error while reading
         if (bytesRead < 0) {
             int errsv = errno;
@@ -134,7 +134,7 @@ int SerialDevice::Read(void *dataBuffer, unsigned int bufferSize, std::chrono::m
  *
  */
 void SerialDevice::Flush() {
-    tcflush(fd, TCIFLUSH);
+    tcflush(m_fd, TCIFLUSH);
 }
 
 /**
@@ -161,9 +161,9 @@ bool SerialDevice::WaitForData(std::chrono::milliseconds timeout) {
     // Setup a select call to block for serial data or a timeout
     fd_set readfds;
     FD_ZERO(&readfds);
-    FD_SET(fd, &readfds);
+    FD_SET(m_fd, &readfds);
     timespec timeout_ts(durationToTimespec(timeout));
-    int ret = pselect(fd + 1, &readfds, NULL, NULL, &timeout_ts, NULL);
+    int ret = pselect(m_fd + 1, &readfds, NULL, NULL, &timeout_ts, NULL);
 
     if (ret <= 0) {
         // Select was interrupted or timedout
