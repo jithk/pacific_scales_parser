@@ -47,6 +47,7 @@ bool SerialDevice::Open(const std::string device, BaudRate baudRate) {
     auto baud = baudMap.find(baudRate);
     if (baud == baudMap.end()) {
         // invalid baud rate
+        std::cerr << "Invalid BaudRate" << std::endl;
         return false;
     }
 
