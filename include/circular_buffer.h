@@ -63,7 +63,7 @@ public:
 
     std::string GetLine() {
         const LockGuard lock(m_mutex);
-        const char *stringBuffer = reinterpret_cast<const char *>(m_data.data());
+        char *stringBuffer = reinterpret_cast<char *>(m_data.data());
         auto bufferEnd = m_readHead > m_writeHead ? MAX_SIZE : m_writeHead;
         int stringStart = -1;
         int searchIndex = 0;
@@ -71,14 +71,15 @@ public:
             std::string str;
             stringStart = -1;
             for (searchIndex = start; searchIndex < end; searchIndex++) {
-                // std::cout << "Processing Char : " << stringBuffer[i] << std::endl;
                 if (stringBuffer[searchIndex] == '\r' || stringBuffer[searchIndex] == '\n') {
+                    stringBuffer[searchIndex] = 0;
                     if (stringStart < 0) {
                         // We havent found a string yet, continue
                         continue;
                     }
                     // We have a string
                     str.assign(&stringBuffer[stringStart], searchIndex - stringStart);
+                    std::memset(reinterpret_cast<void *>(&stringBuffer[stringStart]), 0, searchIndex - stringStart);
                     return str;
                 }
                 if (stringStart < 0) {
@@ -99,6 +100,8 @@ public:
             // We found a start, but needs to wrap around
             // std::cout << "Buffer rollover: " << m_readHead << std::endl;
             std::string tempString = std::string(&stringBuffer[stringStart], searchIndex - stringStart);
+            // Zero out the data
+            std::memset(reinterpret_cast<void *>(&stringBuffer[stringStart]), 0, searchIndex - stringStart);
             stringStart = -1;
             searchIndex = 0;
             auto newString = findFullString(0, m_writeHead);
