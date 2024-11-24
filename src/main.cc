@@ -11,7 +11,7 @@
 #include <signal.h>
 
 PacificScales::ScaleDataParser g_scaledataParser;
-PacificScales::CircularBuffer<uint8_t, 1024> g_dataBuffer;
+PacificScales::CircularBuffer<uint8_t, 8192> g_dataBuffer;
 std::atomic<bool> keepRunning = {true};
 
 /**
@@ -38,7 +38,6 @@ void DataReaderThread(const std::string device) {
         auto numRead = dev.Read(block.data(), block.size(), std::chrono::seconds(1));
         if (numRead <= 0) {
             // EAGAIN
-            std::cout << "Got no data :" << numRead << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
             continue;
         }
